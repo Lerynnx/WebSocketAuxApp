@@ -5,7 +5,7 @@ const stompClient = new StompJs.Client({
 stompClient.onConnect = (frame) => {
     setConnected(true);
     console.log('Connected: ' + frame);
-    stompClient.subscribe('/topic/greetings', (greeting) => {
+    stompClient.subscribe('/topic/transfers', (greeting) => {
         showGreeting(JSON.parse(greeting.body).content);
     });
 };
@@ -41,10 +41,21 @@ function disconnect() {
     console.log("Disconnected");
 }
 
-function sendName() {
+function sendTransfer() {
+    const cantidad = parseFloat($("#cantidad").val()) || 0.0;
+    const idCuentaEmisor = parseInt($("#id_cuenta_emisor").val()) || 0;
+    const idCuentaReceptor = parseInt($("#id_cuenta_receptor").val()) || 0;
+
+    const payload = {
+        cantidad: cantidad,
+        id_cuenta_emisor: idCuentaEmisor,
+        id_cuenta_receptor: idCuentaReceptor
+    };
+
     stompClient.publish({
-        destination: "/app/hello",
-        body: JSON.stringify({'name': $("#name").val()})
+        destination: "/app/transfer",
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
     });
 }
 
@@ -56,5 +67,5 @@ $(function () {
     $("form").on('submit', (e) => e.preventDefault());
     $( "#connect" ).click(() => connect());
     $( "#disconnect" ).click(() => disconnect());
-    $( "#send" ).click(() => sendName());
+    $( "#send" ).click(() => sendTransfer());
 });

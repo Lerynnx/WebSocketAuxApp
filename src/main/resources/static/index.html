@@ -27,10 +27,18 @@
         <div class="col-md-6">
             <form class="form-inline">
                 <div class="form-group">
-                    <label for="name">What is your name?</label>
-                    <input type="text" id="name" class="form-control" placeholder="Your name here...">
+                    <label for="cantidad">Cantidad</label>
+                    <input type="number" step="0.01" id="cantidad" class="form-control" placeholder="0.00">
                 </div>
-                <button id="send" class="btn btn-default" type="submit">Send</button>
+                <div class="form-group">
+                    <label for="id_cuenta_emisor">Cuenta emisor</label>
+                    <input type="number" id="id_cuenta_emisor" class="form-control" placeholder="12345">
+                </div>
+                <div class="form-group">
+                    <label for="id_cuenta_receptor">Cuenta receptor</label>
+                    <input type="number" id="id_cuenta_receptor" class="form-control" placeholder="67890">
+                </div>
+                <button id="send" class="btn btn-default" type="submit">Enviar transferencia</button>
             </form>
         </div>
     </div>
@@ -39,7 +47,7 @@
             <table id="conversation" class="table table-striped">
                 <thead>
                 <tr>
-                    <th>Greetings</th>
+                    <th>Respuesta</th>
                 </tr>
                 </thead>
                 <tbody id="greetings">

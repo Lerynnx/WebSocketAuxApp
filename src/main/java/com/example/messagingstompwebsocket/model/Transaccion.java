@@ -4,36 +4,29 @@ import java.time.LocalDateTime;
 
 public class Transaccion {
 	private Integer id;
-	private String clave_indempotencia;
-	private String id_correlacion;
-	private Integer id_cuenta_emisor;
-	private Integer id_cuenta_receptor;
+	private Integer cuenta_emisor_id;
+	private Integer cuenta_receptor_id;
 	private Float cantidad;
 	private LocalDateTime fecha_creacion;
 	private LocalDateTime fecha_actualizacion;
-	private String estado_id;
-
+	private short estado_id;
 	
-	public Transaccion() {
-		super();
-	}
-
-	public Transaccion(Integer id, String clave_indempotencia, String id_correlacion, Integer id_cuenta_emisor,
-			Integer id_cuenta_receptor, Float cantidad, LocalDateTime fecha_creacion, LocalDateTime fecha_actualizacion,
-			String estado_id) {
+	public Transaccion(Integer id, Integer cuenta_emisor_id, Integer cuenta_receptor_id, Float cantidad,
+			LocalDateTime fecha_creacion, LocalDateTime fecha_actualizacion, short estado_id) {
 		super();
 		this.id = id;
-		this.clave_indempotencia = clave_indempotencia;
-		this.id_correlacion = id_correlacion;
-		this.id_cuenta_emisor = id_cuenta_emisor;
-		this.id_cuenta_receptor = id_cuenta_receptor;
+		this.cuenta_emisor_id = cuenta_emisor_id;
+		this.cuenta_receptor_id = cuenta_receptor_id;
 		this.cantidad = cantidad;
 		this.fecha_creacion = fecha_creacion;
 		this.fecha_actualizacion = fecha_actualizacion;
 		this.estado_id = estado_id;
 	}
 
-	
+	public Transaccion() {
+		super();
+	}
+
 	public Integer getId() {
 		return id;
 	}
@@ -42,36 +35,20 @@ public class Transaccion {
 		this.id = id;
 	}
 
-	public String getClave_indempotencia() {
-		return clave_indempotencia;
+	public Integer getCuenta_emisor_id() {
+		return cuenta_emisor_id;
 	}
 
-	public void setClave_indempotencia(String clave_indempotencia) {
-		this.clave_indempotencia = clave_indempotencia;
+	public void setCuenta_emisor_id(Integer cuenta_emisor_id) {
+		this.cuenta_emisor_id = cuenta_emisor_id;
 	}
 
-	public String getId_correlacion() {
-		return id_correlacion;
+	public Integer getCuenta_receptor_id() {
+		return cuenta_receptor_id;
 	}
 
-	public void setId_correlacion(String id_correlacion) {
-		this.id_correlacion = id_correlacion;
-	}
-
-	public Integer getId_cuenta_emisor() {
-		return id_cuenta_emisor;
-	}
-
-	public void setId_cuenta_emisor(Integer id_cuenta_emisor) {
-		this.id_cuenta_emisor = id_cuenta_emisor;
-	}
-
-	public Integer getId_cuenta_receptor() {
-		return id_cuenta_receptor;
-	}
-
-	public void setId_cuenta_receptor(Integer id_cuenta_receptor) {
-		this.id_cuenta_receptor = id_cuenta_receptor;
+	public void setCuenta_receptor_id(Integer cuenta_receptor_id) {
+		this.cuenta_receptor_id = cuenta_receptor_id;
 	}
 
 	public Float getCantidad() {
@@ -98,12 +75,11 @@ public class Transaccion {
 		this.fecha_actualizacion = fecha_actualizacion;
 	}
 
-	public String getEstado_id() {
+	public short getEstado_id() {
 		return estado_id;
 	}
 
-	public void setEstado_id(String estado_id) {
+	public void setEstado_id(short estado_id) {
 		this.estado_id = estado_id;
 	}
-	
 }

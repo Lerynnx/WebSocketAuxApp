@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hello WebSocket</title>
+    <title>WebSocket</title>
+    <!-- integrity es un atributo de seguridad que permite a los navegadores verificar que los archivos recuperados no han sido manipulados -->
+    <!--  crossorigin="anonymous" permite que el recurso se cargue sin credenciales (como cookies o encabezados HTTP de autenticación) -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link href="/main.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -9,17 +11,15 @@
     <script src="/app.js"></script>
 </head>
 <body>
-<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
-    enabled. Please enable
-    Javascript and reload this page!</h2></noscript>
+<noscript><h2 style="color: #ff0000">Parece que su navegador no tiene Javascript habilitado. WebSocket requiere Javascript; por favor habilítelo y recargue la página.</h2></noscript>
 <div id="main-content" class="container">
     <div class="row">
         <div class="col-md-6">
             <form class="form-inline">
                 <div class="form-group">
-                    <label for="connect">WebSocket connection:</label>
-                    <button id="connect" class="btn btn-default" type="submit">Connect</button>
-                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
+                    <label for="connect">Conexión WebSocket:</label>
+                    <button id="connect" class="btn btn-default" type="submit">Conectar</button>
+                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Desconectar
                     </button>
                 </div>
             </form>
@@ -32,11 +32,11 @@
                 </div>
                 <div class="form-group">
                     <label for="id_cuenta_emisor">Cuenta emisor</label>
-                    <input type="number" id="id_cuenta_emisor" class="form-control" placeholder="12345">
+                    <input type="text" id="id_cuenta_emisor" class="form-control" placeholder="12345">
                 </div>
                 <div class="form-group">
                     <label for="id_cuenta_receptor">Cuenta receptor</label>
-                    <input type="number" id="id_cuenta_receptor" class="form-control" placeholder="67890">
+                    <input type="text" id="id_cuenta_receptor" class="form-control" placeholder="67890">
                 </div>
                 <button id="send" class="btn btn-default" type="submit">Enviar transferencia</button>
             </form>
@@ -47,14 +47,29 @@
             <table id="conversation" class="table table-striped">
                 <thead>
                 <tr>
-                    <th>Respuesta</th>
+                    <th>ID</th>
+                    <th>Emisor</th>
+                    <th>Receptor</th>
+                    <th>Cantidad</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Mensaje</th>
                 </tr>
                 </thead>
-                <tbody id="greetings">
+                <tbody id="respuesta">
                 </tbody>
             </table>
         </div>
     </div>
+    <!-- DEPURACION Respuestas STOMP
+    <div class="row">
+        <div class="col-md-12">
+            <h4>Mensajes brutos STOMP (JSON)</h4>
+            <div id="rawResponses">
+                <pre id="rawJson" style="background:#f8f9fa;border:1px solid #ddd;padding:10px;white-space:pre-wrap;"></pre>
+            </div>
+        </div>
+    </div> -->
 </div>
 </body>
 </html>

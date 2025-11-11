@@ -1,0 +1,7 @@
+#Esto permite visualizar más detalles en los logs relacionados con WebSocket, conexiones y STOMP.
+logging:
+  level:
+    root: INFO
+    com.example.messagingstompwebsocket: INFO
+    org.springframework.web: INFO
+    org.springframework.messaging: INFO

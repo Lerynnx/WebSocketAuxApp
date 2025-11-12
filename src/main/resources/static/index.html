@@ -1,67 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebSocket</title>
-    <!-- integrity es un atributo de seguridad que permite a los navegadores verificar que los archivos recuperados no han sido manipulados -->
-    <!--  crossorigin="anonymous" permite que el recurso se cargue sin credenciales (como cookies o encabezados HTTP de autenticación) -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link href="/main.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
-    <script src="/app.js"></script>
+<title>WebSocket</title>
+<!-- integrity permite asegurar que el archivo que llega al navegador no haya sido manipulado -->
+<!--  crossorigin="anonymous" permite que el recurso se cargue sin credenciales (como cookies o encabezados HTTP de autenticación) -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+	integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	crossorigin="anonymous">
+<link href="/main.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script src="/app.js"></script>
 </head>
 <body>
-<noscript><h2 style="color: #ff0000">Parece que su navegador no tiene Javascript habilitado. WebSocket requiere Javascript; por favor habilítelo y recargue la página.</h2></noscript>
-<div id="main-content" class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="connect">Conexión WebSocket:</label>
-                    <button id="connect" class="btn btn-default" type="submit">Conectar</button>
-                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Desconectar
-                    </button>
-                </div>
-            </form>
-        </div>
-        <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="cantidad">Cantidad</label>
-                    <input type="number" step="0.01" id="cantidad" class="form-control" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label for="id_cuenta_emisor">Cuenta emisor</label>
-                    <input type="text" id="id_cuenta_emisor" class="form-control" placeholder="12345">
-                </div>
-                <div class="form-group">
-                    <label for="id_cuenta_receptor">Cuenta receptor</label>
-                    <input type="text" id="id_cuenta_receptor" class="form-control" placeholder="67890">
-                </div>
-                <button id="send" class="btn btn-default" type="submit">Enviar transferencia</button>
-            </form>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <table id="conversation" class="table table-striped">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Emisor</th>
-                    <th>Receptor</th>
-                    <th>Cantidad</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                    <th>Mensaje</th>
-                </tr>
-                </thead>
-                <tbody id="respuesta">
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <!-- DEPURACION Respuestas STOMP
+	<noscript>
+		<h2 style="color: #ff0000">Parece que su navegador no tiene
+			Javascript habilitado. WebSocket requiere Javascript; por favor
+			habilítelo y recargue la página.</h2>
+	</noscript>
+	<div id="main-content" class="container">
+		<div class="row">
+			<div class="col-md-6">
+				<form class="form-inline">
+					<div class="form-group">
+						<label for="connect">Conexión WebSocket:</label>
+						<button id="connect" class="btn btn-default" type="submit">Conectar</button>
+						<button id="disconnect" class="btn btn-default" type="submit"
+							disabled="disabled">Desconectar</button>
+					</div>
+				</form>
+			</div>
+			<div class="col-md-6">
+				<div style="margin-top:8px">
+					<strong>ClientId:</strong> <span id="clientId"
+						style="font-family:monospace;color:#2b7a78">(no conectado)</span>
+					&nbsp;&nbsp;<span id="wsStatus" style="color:#999">(estado desconectado)</span>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<form class="form-inline">
+					<div class="form-group">
+						<label for="cantidad">Cantidad</label> <input type="number"
+							step="0.01" id="cantidad" class="form-control" placeholder="0.00">
+					</div>
+					<div class="form-group">
+						<label for="id_cuenta_emisor">Cuenta emisor</label> <input
+							type="text" id="id_cuenta_emisor" class="form-control"
+							placeholder="12345">
+					</div>
+					<div class="form-group">
+						<label for="id_cuenta_receptor">Cuenta receptor</label> <input
+							type="text" id="id_cuenta_receptor" class="form-control"
+							placeholder="67890">
+					</div>
+					<button id="send" class="btn btn-default" type="submit">Enviar
+						transferencia</button>
+				</form>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<table id="conversation" class="table table-striped">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Emisor</th>
+							<th>Receptor</th>
+							<th>Cantidad</th>
+							<th>Fecha</th>
+							<th>Estado</th>
+							<th>Mensaje</th>
+						</tr>
+					</thead>
+					<tbody id="respuesta">
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<!-- DEPURACION Respuestas STOMP
     <div class="row">
         <div class="col-md-12">
             <h4>Mensajes brutos STOMP (JSON)</h4>
@@ -70,6 +90,6 @@
             </div>
         </div>
     </div> -->
-</div>
+	</div>
 </body>
 </html>

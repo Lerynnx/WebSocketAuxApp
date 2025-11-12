@@ -1,46 +1,92 @@
-const stompClient = new StompJs.Client({
+// Generar un clientId único por instancia de cliente para recibir solo los
+// mensajes dirigidos a este cliente (alternativa al uso de sessionId/principal).
+const clientId = 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9);
+
+// Crear cliente STOMP de forma defensiva según cómo exporte la librería UMD
+// (algunas versiones exponen `StompJs`, otras `Stomp`). Si no está presente
+// informamos por consola para que el desarrollador lo vea.
+let StompCtor = null;
+if (typeof window !== 'undefined') {
+    if (window.StompJs && window.StompJs.Client) {
+        StompCtor = window.StompJs.Client;
+    } else if (window.Stomp && window.Stomp.Client) {
+        StompCtor = window.Stomp.Client;
+    }
+}
+
+if (!StompCtor) {
+    console.error('STOMP client library not found. Asegúrate de incluir @stomp/stompjs UMD bundle antes de app.js');
+}
+
+const stompClient = StompCtor ? new StompCtor({
     // URL del endpoint STOMP expuesto por la aplicación Spring Boot
     brokerURL: 'ws://localhost:8080/gs-guide-websocket'
-});
+}) : null;
 
 // Se ejecuta cuando la conexión STOMP se establece correctamente
-stompClient.onConnect = (frame) => {
-    setConnected(true);
-	//! DEPURACION
-    //console.log('Conectado: ' + frame);
-    stompClient.subscribe('/topic/transfers', (respuesta) => {
-        //! Trama para DEPURACION
-        //console.log('Trama STOMP recibida:', respuesta);
-
-        // Mostrar JSON 'crudo' en la sección rawJson
+if (stompClient) {
+    stompClient.onConnect = (frame) => {
+        setConnected(true);
+        //! DEPURACION
+        //console.log('Conectado: ' + frame);
+        // Suscribirse a una cola dedicada a este cliente: /queue/transfers-{clientId}.
+        // El servidor publicará la respuesta a ese destino cuando reciba el
+        // campo clientId en el payload.
+        const destinoPersonal = '/queue/transfers-' + clientId;
+        // Mostrar en consola para facilitar depuración en el navegador
+        console.log('STOMP conectado. clientId=', clientId, 'suscribiendo a', destinoPersonal);
+        // Actualizar la UI con el clientId y estado
         try {
-            const parsed = JSON.parse(respuesta.body);
-            const pretty = JSON.stringify(parsed, null, 2);
-            appendRawMessage(pretty);
-            // Mantener la visualización en la tabla
-            // Si llega un objeto con muchos campos, mostrar todos
-            showRespuesta(parsed);
+            $("#clientId").text(clientId);
+            $("#wsStatus").text('(conectado)');
         } catch (e) {
-            // Si el body no es JSON, mostrar el body tal cual
-            appendRawMessage(respuesta.body);
-            showRespuesta(respuesta.body);
+            console.warn('No se pudo actualizar UI clientId/wsStatus', e);
         }
+        stompClient.subscribe(destinoPersonal, (respuesta) => {
+            //! Trama para DEPURACION
+            //console.log('Trama STOMP recibida:', respuesta);
+
+            // Mostrar JSON 'crudo' en la sección rawJson
+            try {
+                const parsed = JSON.parse(respuesta.body);
+                const pretty = JSON.stringify(parsed, null, 2);
+                appendRawMessage(pretty);
+                // Mantener la visualización en la tabla
+                // Si llega un objeto con muchos campos, mostrar todos
+                showRespuesta(parsed);
+            } catch (e) {
+                // Si el body no es JSON, mostrar el body tal cual
+                appendRawMessage(respuesta.body);
+                showRespuesta(respuesta.body);
+            }
+        });
+    };
+
+    // Manejo de errores provistos por el broker (frame ERROR)
+    stompClient.onStompError = (frame) => {
+        console.error('STOMP broker error:', frame.headers, frame.body);
+        appendRawMessage('STOMP ERROR: ' + JSON.stringify(frame.headers || {}) + '\n' + frame.body);
+    };
+
+    // Errores de WebSocket nativo
+    stompClient.onWebSocketError = (evt) => {
+        console.error('WebSocket error', evt);
+    };
+
+    // Loguear desconexiones
+    stompClient.onDisconnect = (frame) => {
+        console.log('STOMP disconnected', frame);
+        try {
+            $("#wsStatus").text('(desconectado)');
+        } catch (e) {}
+    };
+} else {
+    // Si no hay cliente STOMP, deshabilitar botones para evitar intentos
+    $(function () {
+        $("#connect").prop('disabled', true);
+        $("#send").prop('disabled', true);
     });
-};
-
-//!DEPURACION
-// Se ejecuta cuando hay un error a nivel WebSocket
-//stompClient.onWebSocketError = (error) => {
-//    console.error('Error con el websocket', error);
-//};
-
-// Se ejecuta cuando el broker STOMP reporta un error (ERROR frame)
-//stompClient.onStompError = (frame) => {
-//    console.error('Broker reportó un error: ' + (frame.headers ? frame.headers['message'] : 'sin mensaje'));
-//    console.error('Detalles adicionales: ' + frame.body);
-//    // También mostrar el frame de error en el área cruda
-//    appendRawMessage('STOMP ERROR: ' + JSON.stringify(frame.headers || {}) + '\n' + frame.body);
-//};
+}
 
 // Helper para escapar HTML y evitar inyección simple
 function escapeHtml(unsafe) {
@@ -77,6 +123,7 @@ function disconnect() {
     stompClient.deactivate();
     setConnected(false);
     console.log("Desconectado");
+    try { $("#wsStatus").text('(desconectado)'); } catch(e){}
 }
 
 // Envía una transferencia al controlador STOMP (/app/transfer)
@@ -89,13 +136,24 @@ function sendTransfer() {
         cantidad: cantidad,
         numero_cuenta_emisor: NumCuentaEmisor,
         numero_cuenta_receptor: NumCuentaReceptor
+        , clientId: clientId
     };
 
-    stompClient.publish({
-        destination: "/app/transfer",
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
+    console.log('Enviando payload STOMP:', payload);
+    if (!stompClient) {
+        console.error('No STOMP client available, abortando envío');
+        return;
+    }
+
+    try {
+        stompClient.publish({
+            destination: "/app/transfer",
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    } catch (e) {
+        console.error('Error publicando STOMP:', e);
+    }
 }
 
 // Muestra la respuesta en la tabla

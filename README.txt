@@ -28,41 +28,25 @@ Opción 2 con notificaciones push (WebSocket + STOMP) asíncrona
 Recibir NOTIFICACIONES en tiempo real desde Postman (WebSocket + STOMP)
 Postman puede abrir una conexión WebSocket; para recibir los mensajes STOMP. Pasos:
 
-A) Abre Postman → New → WebSocket Request.
-B) Conéctate a:
-ws://localhost:8080/gs-guide-websocket
+Mandar estos mensajes STOMP en este orden (CODIFICANDO EN HEXADECIMAL)
 
-C) Envía un frame STOMP CONNECT (texto). Un frame STOMP tiene la forma:
 CONNECT
-accept-version:1.2
-host:localhost
+accept-version:1.2,1.1,1.0
+heart-beat:10000,10000
 
-\0
+NULL
 
-D) Envía un SUBSCRIBE al topic:
+
 SUBSCRIBE
 id:sub-0
-destination:/topic/transfers
+destination:/queue/transfers-d88bc080-e3f4-f179-68a6-a713cba3892e  --> El id se recoge de la traza que sale por consola en el Connect anterior
 
-\0
+NULL
+
 
 SEND
 destination:/app/transfer
 content-type:application/json
+content-length:130                 --> MUY IMPORTANTE: el content-length debe coincidir con el tamaño del JSON que se envía!!
 
-{"cantidad":100.0,"numero_cuenta_emisor":1,"numero_cuenta_receptor":2}\0
-
-DISCONNECT
-
-\0
-
-
-Si todo va bien, en WebSocket de Postman saldrá un STOMP tipo MESSAGE con el payload JSON enviado desde el servidor.
-
--------------------------------------------------------------------------------------------------------------------------------------------
-IMPORTANTE
-- Los frames STOMP deben terminar con el caracter nulo (\0). En algunos clientes WebSocket esto hay que enviarlo explícitamente;
-en Postman, para representar la terminación nula intenta enviar el carácter unicode \u0000 al final del mensaje o copia/pega un
-terminador nulo si tu versión de Postman lo acepta.
-
-Actualmente, Postman no soporta enviar el carácter nulo directamente. Por lo que NO SE PUEDE USAR STOMP con POSTMAN.
+{"cantidad":341,"numero_cuenta_emisor":"1rd","numero_cuenta_receptor":"325rdfa","clientId":"d88bc080-e3f4-f179-68a6-a713cba3892e"}NULL   --> El id igual
